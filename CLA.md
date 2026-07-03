@@ -27,11 +27,10 @@ worldwide, non-exclusive, no-charge, royalty-free, irrevocable copyright license
 reproduce, prepare derivative works of, publicly display, publicly perform, sublicense,
 and distribute Your Contributions and such derivative works.
 
-**Dual / relicensing rights.** You expressly agree that the Maintainer may license and
+**Relicensing rights.** You expressly agree that the Maintainer may license and
 distribute Your Contribution both (a) under the GNU Affero General Public License,
-version 3, and (b) under separate terms, including proprietary or commercial licenses,
-as part of the Maintainer's open-core and hosted-service model. This right to relicense
-and sublicense is a material part of this Agreement.
+version 3, and (b) under separate terms. This right to relicense and sublicense is a
+material part of this Agreement.
 
 ## 3. Grant of Patent License
 

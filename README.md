@@ -2,7 +2,7 @@
 
 <p align="center">
   <strong>Open-source infrastructure for running a community.</strong><br>
-  Free to self-host, forever. Pay us only if you'd rather we host it.
+  Free to self-host, forever.
 </p>
 
 <p align="center">
@@ -29,8 +29,8 @@ product is `core + one vertical`, so every product inherits every fix and update
 
 Small orgs get priced out of the software they need — incumbents charge $100–500/month
 for member management. Commons is free to self-host under AGPLv3, so a single volunteer
-can stand it up and own their data. If they'd rather not run a server, we offer a hosted
-service at a fair price — the hosting is the product, the software stays free.
+can stand it up and own their data — no per-seat fees, no feature paywall, no vendor
+lock-in. It's yours.
 
 ## Status
 
@@ -41,9 +41,9 @@ agreement, and governance** before any engine code. The code itself comes next.
 
 - **Code:** [AGPLv3](LICENSE) — self-host free; network use requires sharing modifications.
 - **Contributions:** require the [Contributor License Agreement](CLA.md) so the project
-  can stay open *and* offer a sustaining hosted service.
-- **The "Commons" name** is a trademark — see [`TRADEMARK.md`](TRADEMARK.md). You can fork
-  the code; you can't use the name for your fork or a competing hosted service.
+  can stay dependably open.
+- **The "Commons" name and logo** — see [`BRANDING.md`](BRANDING.md). You can fork the
+  code; you just can't use the name or logo to pass your fork off as the official project.
 
 ## Contributing
 

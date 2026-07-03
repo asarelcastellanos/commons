@@ -26,8 +26,8 @@ These are architectural commitments, not afterthoughts:
 - **Encryption in transit** — deployments ship with TLS (Caddy auto-HTTPS for self-host).
 - **Encryption at rest** — sensitive fields (e.g. phone numbers) supported via a
   field-encryption key; disk/volume encryption documented for self-host.
-- **Backups are encrypted client-side**, and for hosted backups the org holds the key —
-  we store ciphertext we can't read.
+- **Backups are encrypted client-side** — the org holds the key, so backups are
+  ciphertext only the org can read.
 - **Least privilege** — members never authenticate; only staff do, keeping the auth
   surface small. Role-based access controls what staff can see.
 - **No hard-deletes of historical data** — soft flags preserve integrity and auditability.
@@ -35,7 +35,6 @@ These are architectural commitments, not afterthoughts:
 
 ## Data controller responsibility
 
-- **Self-host:** the organization running Commons is the data controller and owns
-  compliance (GDPR/CCPA/etc.). We provide secure defaults and documentation.
-- **Hosted SaaS:** the Commons maintainer (via its legal entity) is the data processor
-  and operates under Data Processing Agreements with each customer.
+Commons is self-hosted software: the organization running it is the data controller and
+owns compliance (GDPR/CCPA/etc.). We provide secure defaults and documentation so that's
+as painless as possible.

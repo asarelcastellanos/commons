@@ -14,23 +14,20 @@ will formalize as the project and community grow.`
 
 ## Copyright & relicensing
 
-The maintainer remains the **sole copyright holder** via the [CLA](CLA.md). This is
-intentional: it's what allows the project to stay open under AGPLv3 while sustaining
-itself through a first-party hosted service and (optionally) commercially-licensed
-add-on modules. Contributors retain ownership of their work and grant the maintainer a
-broad, relicensable license.
+The maintainer remains the **sole copyright holder** via the [CLA](CLA.md). This keeps
+stewardship clear and lets the project stay dependably open under AGPLv3. Contributors
+retain ownership of their work and grant the maintainer a broad license to steward it.
 
-## The dual-track promise (why the model is trustworthy)
+## The commitment
 
-- The **core engine stays AGPLv3 and self-hostable, forever.** This is a commitment, not
-  a teaser. The free tier is the point of the project.
-- Revenue comes from **hosting/convenience/support**, not from paywalling core features.
-- Any future premium modules are strictly *convenience* add-ons; nothing essential to
-  running a community moves behind a paywall.
+- The **engine stays AGPLv3 and self-hostable, forever.** This is a commitment, not a
+  teaser — free self-hosting is the point of the project.
+- **No feature paywall.** Everything needed to run a community stays in the open core.
+- **You own your data and your deployment.** No per-seat fees, no lock-in.
 
 ## How this evolves
 
 As contributors and adopters arrive, expect to add: a documented release process, a
 maintainers group with merge rights, an RFC process for large changes, and — if a
-neutral home makes sense — a fiscal sponsor or nonprofit entity to hold the assets and
-run the hosted service. Those are future steps, recorded via ADRs when taken.
+neutral home makes sense — a fiscal sponsor or nonprofit entity to hold the assets.
+Those are future steps, recorded when taken.

@@ -5,9 +5,8 @@ software they've been priced out of — contributions keep that promise alive.
 
 ## Before you start: the CLA (required)
 
-Every contributor must agree to the [Contributor License Agreement](CLA.md). This is what
-lets Commons stay open under AGPLv3 **while** offering a sustaining hosted service — it
-keeps the project a single copyright holder so we can dual-license responsibly.
+Every contributor must agree to the [Contributor License Agreement](CLA.md). It keeps the
+project a single copyright holder so Commons can stay dependably open under AGPLv3.
 
 Until [CLA Assistant](https://github.com/cla-assistant/cla-assistant) is wired up:
 
