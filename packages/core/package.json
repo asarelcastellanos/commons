@@ -1,0 +1,33 @@
+{
+  "name": "@commons/core",
+  "version": "0.0.0",
+  "private": true,
+  "description": "The Commons engine — vertical-neutral. See ../../ARCHITECTURE.md.",
+  "license": "AGPL-3.0-only",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -b",
+    "typecheck": "tsc -b --noEmit || tsc --noEmit",
+    "test": "vitest run",
+    "db:generate": "pnpm build && pnpm db:generate:sqlite && pnpm db:generate:pg",
+    "db:generate:sqlite": "COMMONS_DIALECT=sqlite drizzle-kit generate",
+    "db:generate:pg": "COMMONS_DIALECT=postgres drizzle-kit generate",
+    "db:migrate": "tsx src/db/migrate.ts"
+  },
+  "dependencies": {
+    "better-sqlite3": "^11.5.0",
+    "drizzle-orm": "^0.36.0",
+    "pg": "^8.13.0"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.11",
+    "@types/pg": "^8.11.0",
+    "drizzle-kit": "^0.28.0"
+  }
+}
