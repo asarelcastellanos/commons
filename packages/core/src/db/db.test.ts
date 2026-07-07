@@ -1,3 +1,11 @@
+/**
+ * Organization CRUD, exercised against a real (in-memory) SQLite database. This is the
+ * proof that the M1 data layer actually works end to end: a generated id + audit
+ * timestamps on insert, soft-delete that stamps `deleted_at` without removing the row,
+ * and the unique-slug constraint. Runs on the primary engine (SQLite); the parity test
+ * is what gives us confidence the Postgres schema behaves the same.
+ */
+
 import { describe, it, expect } from "vitest";
 import { eq } from "drizzle-orm";
 import { migrate } from "drizzle-orm/better-sqlite3/migrator";
@@ -11,7 +19,7 @@ function must<T>(v: T | undefined | null, msg = "expected a value"): T {
   return v;
 }
 
-/** A migrated in-memory SQLite database — the primary engine (ADR-0006). */
+/** A migrated in-memory SQLite database — the primary engine. */
 function freshDb(): Extract<Db, { dialect: "sqlite" }> {
   const db = createDb(":memory:");
   if (db.dialect !== "sqlite") throw new Error("expected sqlite");

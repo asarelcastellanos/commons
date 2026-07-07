@@ -8,7 +8,7 @@ a vertical package, added later.
 
 - Org / tenancy (multi-tenant-capable, degrades to single-tenant for self-host)
 - People roster (loginless members)
-- Auth (pluggable provider — **first thing to build**, see ADR-0004)
+- Auth (pluggable provider — **first thing to build**)
 - Module registry (the contract verticals plug into — the keystone)
 - Forms · Events (RRULE) · Attendance/QR · Messaging · Public page · CSV
 - Theming (three-tier cascade) · Setup wizard · Data layer (Postgres/SQLite via Drizzle)

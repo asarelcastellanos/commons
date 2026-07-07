@@ -1,7 +1,15 @@
 /**
- * One connection string decides the database engine (ARCHITECTURE.md §5).
- * This module owns the (pure, testable) rule that maps a `DATABASE_URL` to a dialect.
- * The actual client construction lives in `./client.ts`.
+ * One connection string decides the database engine.
+ *
+ * Big picture (ARCHITECTURE.md §5, "the data layer"): Commons stores everything in a
+ * single schema that runs on EITHER Postgres OR SQLite, and which one you get is chosen
+ * purely by the `DATABASE_URL` you set — no code changes, no rebuild. A self-hoster points
+ * it at a local file (SQLite); the hosted service points it at Postgres.
+ *
+ * This module owns just the small, PURE rule that turns a `DATABASE_URL` string into a
+ * dialect name ("sqlite" | "postgres"). It opens no connections — that is `./client.ts`'s
+ * job. Keeping the rule pure is what lets `./dialect.test.ts` exercise every case with no
+ * real database.
  */
 
 export type Dialect = "postgres" | "sqlite";

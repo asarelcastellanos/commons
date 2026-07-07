@@ -141,11 +141,12 @@ Org override              (the org's saved colors + logo, from the dashboard
 
 ---
 
-## 7. Auth — the linchpin refactor
+## 7. Auth — the pluggable linchpin
 
 The core promise of Commons is a **free self-host tier a single volunteer can run** with
 one command. A hosted-only auth dependency breaks that: it forces every self-hoster into
-a third-party account and undermines "own your data". So:
+a third-party account and undermines "own your data". So auth is designed **pluggable from
+day one** — never hardwired to a hosted provider:
 
 - Core defines an **auth provider interface** (sign-in, session, current-staff-user).
 - Ships with a **portable default** (e.g. Auth.js / Lucia / a small custom email+password
@@ -154,8 +155,10 @@ a third-party account and undermines "own your data". So:
 - **Members never authenticate** — only staff. This keeps the auth surface tiny.
 
 File storage should be S3-compatible (portable) and the DB is just Postgres/SQLite, so
-**auth is the one subsystem that must be decoupled first.** It gates the whole
-self-host story.
+**auth is the subsystem where getting the interface seam right matters most.** It gates
+the whole self-host story — which is why it's the first *feature* built on top of the data
+layer (M3), written behind that interface from its first line rather than wired to one
+provider and pried loose later.
 
 ---
 
@@ -191,8 +194,6 @@ obligation to yourself, and AGPL's network clause stops competitors from strip-m
   (nonprofits, community groups) is trust- and price-sensitive. Any premium add-ons stay
   "convenience," never core features.
 
-See `docs/adr/0001-use-agplv3.md` and `docs/adr/0003-cla-and-copyright.md`.
-
 ---
 
 ## 10. Building order
@@ -204,12 +205,12 @@ by four principles:
    tables and run migrations. It is the literal bedrock.
 2. **Don't design the module registry in a vacuum.** It is the keystone (§11) *and* the
    most abstract piece. Designed before any real subsystem exists, it will be wrong and
-   over-built. Extract it from **two concrete subsystems**, don't predict it (ADR-0005).
+   over-built. Extract it from **two concrete subsystems**, don't predict it.
 3. **Race to a walking skeleton.** The thinnest end-to-end slice that proves the thesis —
    *a person participates without an account* — is the real integration test. Reaching it
    early flushes out architectural mistakes while they are still cheap.
 4. **"Auth first" is a priority, not a commit order.** Auth gates the self-host story
-   (§7, ADR-0004), but it needs the data layer, an org, and ideally the registry beneath
+   (§7), but it needs the data layer, an org, and ideally the registry beneath
    it. Auth is the first *feature*, not the first line of code.
 
 The milestones:
@@ -218,7 +219,7 @@ The milestones:
 |---|---|---|---|
 | **M0** | **Skeleton** | pnpm workspace, TS, lint/CI, Drizzle wired to one connection string, a migration runner. Empty but it boots. | Prerequisite for everything. |
 | **M1** | **Bedrock + two direct subsystems** | Data-layer conventions (`orgId` scoping, soft-delete only, dual Postgres/SQLite dialect). **Organization** (bootstrap-core root scope). **People roster** (built directly). | Gives two real subsystems to learn the pattern from before abstracting it. |
-| **M2** | **Module registry** | Extract the `Module`/`Vertical` contract (§11) from what M1 actually needed. Retrofit people as the first *registered* module. | The keystone, extracted from concrete need, not guessed. Core dogfoods the same registry verticals use. |
+| **M2** | **Module registry** | Extract the `Module`/`Vertical` contract (§11) from what M1 actually needed. Then move people onto it as the first *registered* module. | The keystone, extracted from concrete need, not guessed. Core dogfoods the same registry verticals use. |
 | **M3** | **Auth** | Provider interface + portable default (email+password + sessions), built as a core module *through* the registry. Staff-only. | The self-host gate (§7). First real login. |
 | **M4** | **Walking skeleton** | Event (single occurrence) → QR → Form → Attendance → roster shows the check-in. | Thinnest end-to-end slice; proves the architecture. |
 | **M5** | **Thicken core** | Recurring events (RRULE), messaging (email + unsubscribe), theming cascade, public page, import/export, setup wizard. | Flesh out §4 once the spine holds. |
@@ -257,13 +258,13 @@ type Vertical = {
 At boot: load the configured vertical → enable its modules → run only their migrations
 → mount their nav/routes → apply its terminology + theme preset (still overridable by
 the org). Built at **M2**, extracted from the two concrete subsystems M1 delivers rather
-than designed up front (§10, ADR-0005).
+than designed up front (§10).
 
 ---
 
 ## 12. Where to look when you're lost
 
-- **"Why did we choose X?"** → `docs/adr/`
+- **"Why did we choose X?"** → this file — each section explains its own rationale
 - **"How do I contribute / what's the CLA?"** → `CONTRIBUTING.md`, `CLA.md`
 - **"What's the big picture?"** → this file, §2 and §8
 - **"What do I build next?"** → §10 (the M0→M6 milestone table), then §11 (module registry)

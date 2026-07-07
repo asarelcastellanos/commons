@@ -1,11 +1,16 @@
 /**
- * Migration runner. Applies pending migrations for the configured dialect, from that
- * dialect's own folder (`drizzle/sqlite` or `drizzle/pg`).
+ * Migration runner. A "migration" is a versioned SQL script that brings a database's
+ * shape up to date with the code (create the `organizations` table, add a column, etc.).
+ * Drizzle generates these scripts from our schema files; this runner APPLIES the pending
+ * ones. Because the two engines need different SQL, each dialect has its own folder of
+ * scripts (`drizzle/sqlite` or `drizzle/pg`) and we run whichever matches DATABASE_URL.
  *
  * Run with: `pnpm --filter @commons/core db:migrate`
  *
- * From M2 the module registry will drive per-module migrations (ARCHITECTURE.md §5, §11);
- * until then this applies the core folder.
+ * Today this applies the single core folder. Later (milestone M2) the module registry
+ * will run migrations per ENABLED module instead — each subsystem/vertical owns its own
+ * tables and only those get created (ARCHITECTURE.md §5, §11). That is the "modules plug
+ * into core" model; this runner is its simple precursor.
  */
 
 import BetterSqlite3 from "better-sqlite3";

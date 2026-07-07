@@ -1,10 +1,19 @@
 /**
- * Database client factory. Reads the one connection string (ARCHITECTURE.md §5),
- * resolves the dialect, and returns a Drizzle instance for that engine (ADR-0006).
+ * Database client factory — the one place that actually OPENS a database. It reads the
+ * connection string (ARCHITECTURE.md §5), asks `./dialect.ts` which engine it names, and
+ * hands back a ready-to-use Drizzle ORM handle for that engine.
  *
- * SQLite (primary) runs on `better-sqlite3`; Postgres (hosted tier) on `pg`. The result
- * is a discriminated union so the rare caller that must branch can, while most code will
- * go through the (future) dialect-neutral repository layer.
+ * Why support two engines: self-host is the reason
+ * the project exists, and a self-hoster should be able to run from a single SQLite file
+ * ("one file, trivial backups"). The paid hosted tier wants Postgres instead. So SQLite
+ * (via `better-sqlite3`) is the PRIMARY/default engine and Postgres (via `pg`) is the
+ * hosted path — both supported and tested from day one.
+ *
+ * The return type is a discriminated union (tagged by `dialect`) so the rare caller that
+ * MUST branch on engine can. But almost all application code will eventually go through a
+ * dialect-neutral "repository" layer so it never sees the difference. That layer is
+ * deliberately NOT built yet: we extract abstractions from real call-sites once they
+ * exist, rather than guess their shape up front.
  */
 
 import BetterSqlite3 from "better-sqlite3";
