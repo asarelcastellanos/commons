@@ -96,6 +96,6 @@ is wired up, contributors indicate agreement by adding their name below in a pul
 
 **Signed:**
 
-| Name | GitHub username | Date |
-|------|-----------------|------|
-|      |                 |      |
+|     Name     | GitHub username |    Date    |
+|--------------|-----------------|------------|
+| Sarah Rivera |     sjr2211     | 07/09/2026 |
