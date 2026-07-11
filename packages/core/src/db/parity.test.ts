@@ -9,12 +9,24 @@
 import { describe, it, expect } from "vitest";
 import { getTableConfig as sqliteTableConfig } from "drizzle-orm/sqlite-core";
 import { getTableConfig as pgTableConfig } from "drizzle-orm/pg-core";
-import { organizations as sqliteOrgs, people as sqlitePeople } from "./schema.sqlite.js";
-import { organizations as pgOrgs, people as pgPeople } from "./schema.pg.js";
+import {
+  organizations as sqliteOrgs,
+  people as sqlitePeople,
+  users as sqliteUsers,
+  sessions as sqliteSessions,
+} from "./schema.sqlite.js";
+import {
+  organizations as pgOrgs,
+  people as pgPeople,
+  users as pgUsers,
+  sessions as pgSessions,
+} from "./schema.pg.js";
 
 const TABLES = [
   { name: "organizations", sqlite: sqliteOrgs, pg: pgOrgs },
   { name: "people", sqlite: sqlitePeople, pg: pgPeople },
+  { name: "users", sqlite: sqliteUsers, pg: pgUsers },
+  { name: "sessions", sqlite: sqliteSessions, pg: pgSessions },
 ];
 
 describe.each(TABLES)("$name parity", ({ sqlite, pg }) => {

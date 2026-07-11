@@ -1,7 +1,7 @@
 # Commons — Progress & Handoff
 
 > Working log to resume across sessions. The durable "why" lives in `ARCHITECTURE.md`;
-> this file is the "where we are / what's next". Last updated: 2026-07-02.
+> this file is the "where we are / what's next". Last updated: 2026-07-11.
 
 ## Status at a glance
 
@@ -9,8 +9,15 @@
 |---|---|
 | **M0** — skeleton (workspace, TS, lint/CI, Drizzle wired) | ✅ done, green |
 | **M1** — bedrock: data layer + Organization + **People roster** | ✅ done, green |
-| M2 — module registry (extract from org+people) | ⏭️ **next up** |
-| M3 — auth · M4 — walking skeleton · M5 — thicken core · M6 — first vertical | ⬜ |
+| **M2** — auth & staff users (provider + email/password + sessions + roles) | ✅ done, green |
+| **M3** — walking skeleton (app/runtime seam + Event→QR→Form→Attendance) | ⏭️ **next up** |
+| M4 — module registry · M5 — thicken core · M6 — first vertical | ⬜ |
+
+> **Ordering changed (2026-07-07):** the module registry moved from M2 to M4. Org + People
+> are both data-only and reveal only half of a "module" (tables/migrations, not routes/
+> sessions/optionality). Auth moves up to M2 so the registry is later extracted from four
+> varied subsystems (org, people, auth, events), not guessed from two thin ones. See
+> ARCHITECTURE.md §10.
 
 **Everything is green on Node 24** (lint · format · typecheck · test · build). The M0/M1
 foundation is committed; keep the no-AI-attribution rule on future commits.
@@ -51,7 +58,7 @@ commons/
 ├── .github/workflows/ci.yml    # lint → format → typecheck → test → build (reads .nvmrc)
 └── packages/core/
     ├── drizzle.config.ts       # points at dist/*.js (see gotcha below)
-    ├── drizzle/{sqlite,pg}/     # generated migrations (0000_* orgs, 0001_* people)
+    ├── drizzle/{sqlite,pg}/     # migrations: 0000 orgs, 0001 people, 0002 users+sessions
     └── src/
         ├── index.ts            # public exports
         ├── db/
@@ -59,11 +66,13 @@ commons/
         │   ├── client.ts       # createDb()/getDb() -> dialect-discriminated Drizzle handle
         │   ├── migrate.ts      # per-dialect migration runner
         │   ├── columns/{sqlite,pg}.ts   # shared column vocabulary (id, audit, deletedAt, orgId)
-        │   ├── schema.{sqlite,pg}.ts    # organizations + people tables, mirrored per dialect
-        │   ├── db.test.ts      # org CRUD (insert, soft-delete, unique slug)
-        │   ├── people.test.ts  # people CRUD + first FK (org-delete -> org_id set null)
-        │   └── parity.test.ts  # fails if the two dialect schemas drift
-        └── domain/{organization,person}.ts   # vertical-neutral domain types
+        │   ├── schema.{sqlite,pg}.ts    # organizations · people · users · sessions, per dialect
+        │   ├── db.test.ts · people.test.ts · parity.test.ts
+        ├── auth/
+        │   ├── password.ts     # scrypt hash/verify (node:crypto, no deps)  (+ .test.ts)
+        │   ├── provider.ts     # AuthProvider + AuthStore interfaces
+        │   └── local.ts        # portable default: email+pw + opaque sessions  (+ .test.ts)
+        └── domain/{organization,person,staff-user}.ts   # vertical-neutral domain types
 ```
 
 ## Key decisions made this session
@@ -87,19 +96,44 @@ commons/
 
 ## Next steps
 
-1. **M1 is complete** — organizations + people are both concrete (org-scoped, soft-delete,
-   dual-dialect, parity-guarded). People is **loginless** by design: login + roles are a
-   separate **Staff User** model that arrives with auth (M3), never on the person row.
-2. With org + people both concrete, **design M2 (module registry)** by extracting the
-   `Module`/`Vertical` contract from what they actually needed, then move people onto it as
-   the first *registered* module.
-3. When ready, commit the People roster (no AI attribution).
+1. **M1 + M2 are complete.** Org + People (loginless roster) and Auth & Staff Users (users
+   with the 5-role ladder, opaque sessions, scrypt provider behind a swappable interface).
+2. **Build M3 — walking skeleton.** A minimal app/runtime seam (HTTP + routes) so staff can
+   log in and operate; then Event (single occurrence) → QR → Form → Attendance → the roster
+   shows the check-in. This is the first thing with real routes/nav, and it's what makes the
+   M4 module registry extractable.
+3. When ready, commit each subsystem (no AI attribution).
+
+## Auth roadmap — earmarked "batteries" (keep our own default; adopt a lib behind the seam)
+
+**Decision (2026-07-07):** keep our zero-dependency scrypt + opaque-session default — it's
+green, self-host-friendly, and already matches Better Auth's own crypto choices. When the
+heavier features below are needed, adopt **Better Auth _behind_ the `AuthProvider` interface**
+(MIT-licensed; scrypt by default), mapping its `user` to our staff user via `additionalFields`
+(orgId, role, personId). **Do NOT adopt its organization plugin** — our `organizations` /
+`people` / 5-role ladder stay core; tenancy is an engine concept, not an auth-lib concern.
+
+Done now: session `ip_address` / `user_agent` capture; login timing-equalization (enum guard).
+
+| Battery to add | Why | Earliest fit |
+|---|---|---|
+| Rate-limiting / lockout | brute-force defense | M3 (with HTTP layer) |
+| CSRF + secure cookies (HttpOnly/Secure/SameSite) | browser session safety | M3 (with HTTP layer) |
+| Password strength + breach (HIBP) check | reject weak/pwned passwords | M3–M5 |
+| Email verification | confirm ownership before access | M5 (needs messaging) |
+| Password reset | table-stakes recovery | M5 (needs messaging) |
+| Staff invitations (email a role) | onboard staff without sharing passwords | M5 (needs messaging) |
+| Session audit + revoke-all (uses ip/ua/last-seen) | account security | M5 |
+| 2FA / TOTP + passkeys | stronger staff auth | post-M5 |
+| OAuth / social login | optional convenience (hosted tier) | post-M5 |
+
+Grade the above against **OWASP ASVS** as the checklist.
 
 ## Open questions / to revisit
-- Postgres path is wired but only SQLite is exercised in tests. Add a CI job that runs the
-  same CRUD suite against a Postgres service container (planned for later in M5).
+- Postgres path is wired but only SQLite is exercised in tests (incl. the auth store — only
+  `sqliteAuthStore` exists; a `pgAuthStore` is the mirror task). Add a CI job that runs the
+  suite against a Postgres service container (planned for M5).
 - Repository abstraction (so app code never branches on dialect) is intentionally deferred
   until there are real query call-sites.
-- **Staff User model** (login + role hierarchy: owner/manager/leader) is deferred to M3;
-  it will carry an optional `personId` link to a roster row. `§4` should gain an explicit
-  "Staff User" entry to record this split.
+- `§4` should gain an explicit **Staff User** entry (distinct from Auth-the-mechanism), to
+  record the People-vs-Users split in the subsystem table.

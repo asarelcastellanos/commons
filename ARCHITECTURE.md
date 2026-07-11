@@ -157,8 +157,16 @@ day one** — never hardwired to a hosted provider:
 File storage should be S3-compatible (portable) and the DB is just Postgres/SQLite, so
 **auth is the subsystem where getting the interface seam right matters most.** It gates
 the whole self-host story — which is why it's the first *feature* built on top of the data
-layer (M3), written behind that interface from its first line rather than wired to one
+layer (M2), written behind that interface from its first line rather than wired to one
 provider and pried loose later.
+
+The M2 default is a small, dependency-free implementation (scrypt password hashing via
+`node:crypto`; opaque, revocable database sessions). Heavier "batteries" — email
+verification, password reset, rate-limiting, 2FA, OAuth, staff invitations — are deferred;
+when they're needed the plan is to adopt an established library (e.g. **Better Auth**, MIT,
+which also defaults to scrypt) *behind this same interface* rather than build each from
+scratch — and specifically **not** to hand tenancy to that library: `Organization` and
+`People` stay core (§4). The prioritized list lives in `PROGRESS.md`'s auth roadmap.
 
 ---
 
@@ -203,25 +211,29 @@ by four principles:
 
 1. **Nothing precedes the data layer.** Auth, the registry, and every subsystem write
    tables and run migrations. It is the literal bedrock.
-2. **Don't design the module registry in a vacuum.** It is the keystone (§11) *and* the
-   most abstract piece. Designed before any real subsystem exists, it will be wrong and
-   over-built. Extract it from **two concrete subsystems**, don't predict it.
+2. **Extract the module registry late, from varied subsystems — don't guess it early.**
+   It is the keystone (§11) and the most abstract piece, so it must be shaped by real
+   need. But the *kind* of subsystem matters: Organization and People are both data-only
+   and reveal only half of what a module is (tables, migrations, a dependency) — nothing
+   about routes, sessions, nav, or optionality. Wait until auth and the walking-skeleton
+   features have exercised those too, then extract the contract from four varied
+   subsystems rather than two thin ones.
 3. **Race to a walking skeleton.** The thinnest end-to-end slice that proves the thesis —
    *a person participates without an account* — is the real integration test. Reaching it
    early flushes out architectural mistakes while they are still cheap.
-4. **"Auth first" is a priority, not a commit order.** Auth gates the self-host story
-   (§7), but it needs the data layer, an org, and ideally the registry beneath
-   it. Auth is the first *feature*, not the first line of code.
+4. **Auth is the self-host gate, and the first feature.** It needs the data layer, an org,
+   and a roster beneath it (§7) — all of which now exist — so it comes right after the
+   bedrock, before any more abstraction. Staff-only; members never authenticate.
 
 The milestones:
 
 | # | Milestone | What ships | Why here |
 |---|---|---|---|
 | **M0** | **Skeleton** | pnpm workspace, TS, lint/CI, Drizzle wired to one connection string, a migration runner. Empty but it boots. | Prerequisite for everything. |
-| **M1** | **Bedrock + two direct subsystems** | Data-layer conventions (`orgId` scoping, soft-delete only, dual Postgres/SQLite dialect). **Organization** (bootstrap-core root scope). **People roster** (built directly). | Gives two real subsystems to learn the pattern from before abstracting it. |
-| **M2** | **Module registry** | Extract the `Module`/`Vertical` contract (§11) from what M1 actually needed. Then move people onto it as the first *registered* module. | The keystone, extracted from concrete need, not guessed. Core dogfoods the same registry verticals use. |
-| **M3** | **Auth** | Provider interface + portable default (email+password + sessions), built as a core module *through* the registry. Staff-only. | The self-host gate (§7). First real login. |
-| **M4** | **Walking skeleton** | Event (single occurrence) → QR → Form → Attendance → roster shows the check-in. | Thinnest end-to-end slice; proves the architecture. |
+| **M1** | **Bedrock + two direct subsystems** | Data-layer conventions (`orgId` scoping, soft-delete only, dual Postgres/SQLite dialect). **Organization** (root scope) + **People roster**, built directly. | Two real subsystems to learn the pattern from. |
+| **M2** | **Auth & Staff Users** | Provider interface + portable default (email+password + sessions). A **Staff User** entity with a role hierarchy (owner/manager/leader) and an optional link to a Person. Library-level; staff-only. | The self-host gate (§7); the first feature; adds the sessions/roles/link shape the data-only subsystems lack. |
+| **M3** | **Walking skeleton** | A minimal app/runtime seam (routes) so staff can log in and operate; then Event (single occurrence) → QR → Form → Attendance → roster shows the check-in. | Thinnest end-to-end slice; proves the thesis; the first real routes and nav. |
+| **M4** | **Module registry** | Extract the `Module`/`Vertical` contract (§11) from what M1–M3 actually needed — tables, migrations, dependencies, routes, nav, optionality — then adopt org, people, auth, and the event subsystems as registered modules. | The keystone, extracted from four varied subsystems, not guessed from two thin ones. Core dogfoods the registry verticals use. |
 | **M5** | **Thicken core** | Recurring events (RRULE), messaging (email + unsubscribe), theming cascade, public page, import/export, setup wizard. | Flesh out §4 once the spine holds. |
 | **M6** | **First vertical** | Terminology map + theme preset + any genuinely vertical-specific module. | The engine is proven; now give it a face. |
 
@@ -231,7 +243,7 @@ chat), it's a different product, not a Commons vertical.
 
 ---
 
-## 11. Module registry — the contract (to design next)
+## 11. Module registry — the contract (to extract at M4)
 
 The keystone. A vertical registers features through a single interface so core never
 imports vertical code directly. Rough shape (final form TBD when coding starts):
@@ -257,8 +269,9 @@ type Vertical = {
 
 At boot: load the configured vertical → enable its modules → run only their migrations
 → mount their nav/routes → apply its terminology + theme preset (still overridable by
-the org). Built at **M2**, extracted from the two concrete subsystems M1 delivers rather
-than designed up front (§10).
+the org). Extracted at **M4** from the four subsystems M1–M3 deliver (org, people, auth,
+events) rather than designed up front (§10) — so the contract is shaped by modules that
+actually own routes, sessions, and optionality, not just tables.
 
 ---
 

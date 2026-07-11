@@ -11,16 +11,27 @@
  * Where this file sits in the build order (ARCHITECTURE.md §10 defines milestones M0–M6):
  *   • M0 — Skeleton: the workspace/build/lint/CI plumbing and the database wiring.
  *     Empty of features, but it compiles and boots.
- *   • M1 — Bedrock (this milestone): the data-layer seam (createDb/getDb) plus the first
- *     domain model, Organization. These are the first CONCRETE subsystems everything else
- *     will copy the pattern from.
- *   • M2+ — the module registry, auth, events, messaging, and the rest of §4's subsystems.
+ *   • M1 — Bedrock: the data-layer seam (createDb/getDb) plus the first domain models,
+ *     Organization and Person — the CONCRETE subsystems everything else copies from.
+ *   • M2 — Auth & Staff Users (this milestone): login, the role ladder, and sessions.
+ *   • M3+ — the walking skeleton, the module registry, and the rest of §4's subsystems.
  *
- * So today this exports exactly two things: how to open a database, and the Organization
- * type. That is the whole of M1's public API.
+ * Public API today: how to open a database; the Organization and Person types; and the auth
+ * surface — Staff Users, the role ladder, and the pluggable auth provider.
  */
 
 export { resolveDialect, sqliteFilename, type Dialect } from "./db/dialect.js";
 export { createDb, getDb, type Db, type SqliteDb, type PgDb } from "./db/client.js";
 export type { Organization, NewOrganization } from "./domain/organization.js";
 export type { Person, NewPerson } from "./domain/person.js";
+export {
+  ROLES,
+  ROLE_RANK,
+  hasAtLeast,
+  canManage,
+  type Role,
+  type StaffUser,
+  type NewStaffUser,
+} from "./domain/staff-user.js";
+export { createLocalAuth, sqliteAuthStore } from "./auth/local.js";
+export type { AuthProvider, AuthUser, AuthStore, StoredUser } from "./auth/provider.js";
